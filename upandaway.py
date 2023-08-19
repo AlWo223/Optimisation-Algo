@@ -1,4 +1,5 @@
 import math
+import heapq
 ### Store input data
 nxk = list(map(int, input().strip().split(" ")))
 n = nxk[0]
@@ -23,8 +24,10 @@ def get_neighbours(mountain):
 
 shortest_path = {} # dictionary to store shortest path
 predecessor = {} # dicitionary to store predecessor
-unvisited = list(range(0, n)) # list of unvisited mountains
+#unvisited = list(range(0, n)) # list of unvisited mountains
 lowest_k = {}
+
+pq = [(0, 0)]
 
 for ii in range(0, n):
     shortest_path[ii] = math.inf
@@ -32,16 +35,20 @@ for ii in range(0, n):
     lowest_k[ii] = 0
 shortest_path[0] = 0 # set distance of starting point to 0
 
-while len(unvisited) > 0:
-    current_mountain = min(unvisited) # get mountain with shortest path (PQ)
+while pq:
+    current_shortest, current_mountain = heapq.heappop(pq) # get mountain with shortest path (PQ)
     for ii in get_neighbours(current_mountain):
         possible_path = shortest_path[current_mountain] + distances[current_mountain][ii]
         if(heights[current_mountain]<heights[ii]):
             possible_k = lowest_k[current_mountain] + (heights[ii]-heights[current_mountain])
+        else:
+            possible_k = lowest_k[current_mountain]
         if (possible_path < shortest_path[ii]) and (possible_k <= k):
             shortest_path[ii] = possible_path
             predecessor[ii] = current_mountain
-    unvisited.remove(current_mountain) # set mountain to visited after having explored all neighbours
+            lowest_k[ii] = possible_k
+            heapq.heappush(pq, (shortest_path[ii], ii))
+    #unvisited.remove(current_mountain) # set mountain to visited after having explored all neighbours
 
 if(shortest_path[x-1]<=1000):
     output = shortest_path[x-1]
