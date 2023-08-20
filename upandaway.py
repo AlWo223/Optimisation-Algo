@@ -8,9 +8,8 @@ k = nxk[2]
 heights = list(map(int, input().strip().split(" ")))
 
 distances = [[]] * n
-
 for ii in range(0, n):
-    distances[ii] = list(map(int, input().strip().split(" ")))
+   distances[ii] = list(map(int, input().strip().split(" ")))
 
 ### Dijkstra Algorithm to find shortest path
 
@@ -22,33 +21,27 @@ def get_neighbours(mountain):
             neighbours.append(ii)
     return neighbours
 
-shortest_path = {} # dictionary to store shortest path
-predecessor = {} # dicitionary to store predecessor
-#unvisited = list(range(0, n)) # list of unvisited mountains
-lowest_k = {}
-
-pq = [(0, 0)]
-
-for ii in range(0, n):
-    shortest_path[ii] = math.inf
-    predecessor[ii] = None
-    lowest_k[ii] = 0
+shortest_path = [math.inf] * n # list to store shortest path
+predecessor = [None] * n # dicitionary to store predecessor
+required_k = [math.inf] * n # list to store required k for travel
+required_k[0] = 0
+pq = [(0, 0, 0)] # Priority Queue considering shortest_path and required_k
 shortest_path[0] = 0 # set distance of starting point to 0
 
 while pq:
-    current_shortest, current_mountain = heapq.heappop(pq) # get mountain with shortest path (PQ)
+    current_shortest, current_k, current_mountain = heapq.heappop(pq) # get mountain with shortest path (PQ)
+
+    if current_shortest > shortest_path[current_mountain] or current_k > required_k[current_mountain]:
+        continue
+
     for ii in get_neighbours(current_mountain):
         possible_path = shortest_path[current_mountain] + distances[current_mountain][ii]
-        if(heights[current_mountain]<heights[ii]):
-            possible_k = lowest_k[current_mountain] + (heights[ii]-heights[current_mountain])
-        else:
-            possible_k = lowest_k[current_mountain]
-        if (possible_path < shortest_path[ii]) and (possible_k <= k):
+        possible_required_k = required_k[current_mountain] + max(heights[ii]-heights[current_mountain], 0)
+        if (((possible_path < shortest_path[ii]) or (possible_path == shortest_path[ii] and possible_required_k < required_k[ii])) and (possible_required_k<=k)):
             shortest_path[ii] = possible_path
             predecessor[ii] = current_mountain
-            lowest_k[ii] = possible_k
-            heapq.heappush(pq, (shortest_path[ii], ii))
-    #unvisited.remove(current_mountain) # set mountain to visited after having explored all neighbours
+            required_k[ii] = possible_required_k
+            heapq.heappush(pq, (shortest_path[ii], required_k[ii], ii))
 
 if(shortest_path[x-1]<=1000):
     output = shortest_path[x-1]
